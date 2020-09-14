@@ -16,12 +16,16 @@ describe('When: Use the search feature', () => {
     expect(items.length).toBeGreaterThan(1);
   });
 
-  xit('Then: I should see search results as I am typing', async () => {
+  it('Then: I should see search results as I am typing', async () => {
     await browser.get('/');
     await browser.wait(
       ExpectedConditions.textToBePresentInElement($('tmo-root'), 'okreads')
     );
+    const form = await $('form');
+    const input = await $('input[type="search"]');
+    await input.sendKeys('react');
 
-    // TODO: Implement this test!
+    const searchedItems = await $$('[data-testing="book-item"]');
+    expect(searchedItems.length).toBeGreaterThan(1);
   });
 });
