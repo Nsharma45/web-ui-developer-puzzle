@@ -14,14 +14,14 @@
 </form>
 
 <ng-container *ngIf="searchTerm; else empty" class="row">
-  <div class="book-grid  col-xs-12">
+  <div class="book-grid col-xs-12">
     <div class="book" data-testing="book-item" *ngFor="let b of books$ | async">
       <div class="book--title">
         {{ b.title }}
       </div>
       <div class="book--content">
         <div class="book--content--cover">
-          <img src="{{ b.coverUrl }}" alt="{{ b.title }}" />
+          <img src="{{ b.coverUrl }}" alt="{{ b.coverUrl }}" />
         </div>
         <div class="book--content--info">
           <div><strong>Author:</strong> {{ b.authors.join(',') }}</div>
@@ -37,10 +37,10 @@
               color="primary"
               (click)="addBookToReadingList(b)"
               [disabled]="b.isAdded"
-              aria-label="Want to Read"
-            >
-              Want to Read
-            </button>
+              aria-label="book-action-cta"
+              [innerHTML]="b.isFinished ? 'Finished' : 'Want to read'"
+              data-testing="want-to-read"
+            ></button>
           </div>
         </div>
       </div>

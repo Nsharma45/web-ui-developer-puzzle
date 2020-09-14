@@ -70,6 +70,14 @@ describe('Books Reducer', () => {
 
       expect(result.ids).toEqual(['A', 'B']);
     });
+	 it('markBookAsFinished should mark book as finished in the state', () => {
+      const action = ReadingListActions.markBookAsFinished({
+        item: createReadingListItem('A'),
+      });
+      action.item.finished = true;
+      const result: State = reducer(state, action);
+      expect(result.entities['A'].finished).toEqual(true);
+    });
   });
 
   describe('unknown action', () => {
