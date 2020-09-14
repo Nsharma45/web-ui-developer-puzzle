@@ -7,27 +7,28 @@
       placeholder="Search for books to add to your reading list"
       formControlName="term"
     />
-    <button mat-icon-button matSuffix>
+    <button mat-icon-button matSuffix title="search button">
       <mat-icon>search</mat-icon>
     </button>
   </mat-form-field>
 </form>
 
-<ng-container *ngIf="searchTerm; else empty">
-  <div class="book-grid">
-    <div class="book" data-testing="book-item" *ngFor="let b of books">
+<ng-container *ngIf="searchTerm; else empty" class="row">
+  <div class="book-grid  col-xs-12">
+    <div class="book" data-testing="book-item" *ngFor="let b of books$ | async">
       <div class="book--title">
         {{ b.title }}
       </div>
       <div class="book--content">
         <div class="book--content--cover">
-          <img src="{{ b.coverUrl }}" />
+          <img src="{{ b.coverUrl }}" alt="{{ b.title }}" />
         </div>
         <div class="book--content--info">
           <div><strong>Author:</strong> {{ b.authors.join(',') }}</div>
           <div><strong>Publisher:</strong> {{ b.publisher }}</div>
           <div>
-            <strong>Published:</strong> {{ formatDate(b.publishedDate) }}
+            <strong>Published:</strong>
+            {{ b.publishedDate | date: 'MM/dd/yyyy' }}
           </div>
           <p [innerHTML]="b.description"></p>
           <div>
@@ -36,6 +37,7 @@
               color="primary"
               (click)="addBookToReadingList(b)"
               [disabled]="b.isAdded"
+              aria-label="Want to Read"
             >
               Want to Read
             </button>
