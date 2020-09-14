@@ -34,7 +34,8 @@
 }
 
 .reading-list-item--details--title,
-.reading-list-item--details--author {
+.reading-list-item--details--author,
+.reading-list-item-details-finished-date {
   text-overflow: ellipsis;
   overflow: hidden;
   white-space: nowrap;
@@ -44,4 +45,11 @@
   font-weight: 100;
   font-size: 1rem;
   color: $gray60;
+}
+
+.green-circle {
+  color: $green-dark;
+}
+.width25 {
+  width: 25px;
 }

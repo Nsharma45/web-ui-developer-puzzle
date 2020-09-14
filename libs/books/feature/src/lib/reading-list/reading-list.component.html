@@ -4,14 +4,36 @@
       <img
         class="reading-list-item--cover"
         [src]="b.coverUrl"
-        alt="{{b.title}}"
+        alt="{{ b.title }}"
       />
     </div>
     <div class="reading-list-item--details">
       <strong class="reading-list-item--details--title">{{ b.title }}</strong>
       <div class="reading-list-item--details--author">
-        {{ b.authors.join(',') }}
+        <strong>Author:</strong> {{ b.authors.join(',') }}
       </div>
+      <div
+        class="reading-list-item-details-finished-date"
+        *ngIf="b.finished"
+        data-testing="finished-date"
+      >
+        <strong>Finished:</strong> {{ b.finishedDate | date: 'MM/dd/yyyy' }}
+      </div>
+    </div>
+    <div *ngIf="!b.finished">
+      <button
+        mat-icon-button
+        color="accent"
+        class="width25"
+        (click)="markBookAsFinished(b)"
+        title="Mark as finished"
+        data-testing="finished-button"
+      >
+        <mat-icon>book</mat-icon>
+      </button>
+    </div>
+    <div *ngIf="b.finished">
+      <mat-icon class="green-circle" title="Finished">check_circle</mat-icon>
     </div>
     <div>
       <button
@@ -19,6 +41,7 @@
         color="warn"
         aria-label="Remove from reading list"
         (click)="removeFromReadingList(b)"
+        data-testing="remove-from-list"
       >
         <mat-icon>remove_circle</mat-icon>
       </button>
