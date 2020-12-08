@@ -5,6 +5,9 @@ import { of } from 'rxjs';
 import { catchError, concatMap, exhaustMap, map } from 'rxjs/operators';
 import { ReadingListItem } from '@tmo/shared/models';
 import * as ReadingListActions from './reading-list.actions';
+import { MatSnackBar } from '@angular/material/snack-bar';
+import { BookConstant } from '../book.constant';
+import { take } from 'rxjs/operators';
 
 @Injectable()
 export class ReadingListEffects implements OnInitEffects {
@@ -15,12 +18,12 @@ export class ReadingListEffects implements OnInitEffects {
         this.http
           .get<ReadingListItem[]>('/api/reading-list')
           .pipe(
-            map(data =>
+            map((data) =>
               ReadingListActions.loadReadingListSuccess({ list: data })
             )
           )
       ),
-      catchError(error =>
+      catchError((error) =>
         of(ReadingListActions.loadReadingListError({ error }))
       )
     )
@@ -31,7 +34,25 @@ export class ReadingListEffects implements OnInitEffects {
       ofType(ReadingListActions.addToReadingList),
       concatMap(({ book }) =>
         this.http.post('/api/reading-list', book).pipe(
-          map(() => ReadingListActions.confirmedAddToReadingList()),
+          map(() =>
+            ReadingListActions.confirmedAddToReadingList()
+              .pipe(take(1))
+              .subscribe(() => {
+                const snackBarRef = this.snackbar.open(
+                  book.title + BookConstant.ADDED_MSG,
+                  BookConstant.UNDO,
+                  {
+                    duration: BookConstant.SNACKBAR_DURATION,
+                  }
+                );
+
+                snackBarRef.onAction().subscribe(() => {
+                  ReadingListActions.removeFromReadingList({
+                    item: { ...book, bookId: book.id },
+                  });
+                });
+              })
+          ),
           catchError(() =>
             of(ReadingListActions.failedAddToReadingList({ book }))
           )
@@ -45,7 +66,24 @@ export class ReadingListEffects implements OnInitEffects {
       ofType(ReadingListActions.removeFromReadingList),
       concatMap(({ item }) =>
         this.http.delete(`/api/reading-list/${item.bookId}`).pipe(
-          map(() => ReadingListActions.confirmedRemoveFromReadingList()),
+          map(() =>
+            ReadingListActions.confirmedRemoveFromReadingList()
+              .pipe(take(1))
+              .subscribe(() => {
+                const snackbarRef = this.snackbar.open(
+                  item.title + BookConstant.REMOVED_MSG,
+                  BookConstant.UNDO,
+                  {
+                    duration: BookConstant.SNACKBAR_DURATION,
+                  }
+                );
+                snackbarRef.onAction().subscribe(() => {
+                  ReadingListActions.addToReadingList({
+                    book: { ...item, id: item.bookId },
+                  });
+                });
+              })
+          ),
           catchError(() =>
             of(ReadingListActions.failedRemoveFromReadingList({ item }))
           )
@@ -58,5 +96,9 @@ export class ReadingListEffects implements OnInitEffects {
     return ReadingListActions.init();
   }
 
-  constructor(private actions$: Actions, private http: HttpClient) {}
+  constructor(
+    private actions$: Actions,
+    private http: HttpClient,
+    private snackbar: MatSnackBar
+  ) {}
 }
