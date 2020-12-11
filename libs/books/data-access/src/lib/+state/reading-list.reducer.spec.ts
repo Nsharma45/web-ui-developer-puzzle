@@ -3,7 +3,7 @@ import {
   initialState,
   readingListAdapter,
   reducer,
-  State
+  State,
 } from './reading-list.reducer';
 import { createBook, createReadingListItem } from '@tmo/shared/testing';
 
@@ -22,7 +22,7 @@ describe('Books Reducer', () => {
       const list = [
         createReadingListItem('A'),
         createReadingListItem('B'),
-        createReadingListItem('C')
+        createReadingListItem('C'),
       ];
       const action = ReadingListActions.loadReadingListSuccess({ list });
 
@@ -34,7 +34,7 @@ describe('Books Reducer', () => {
 
     it('failedAddToReadingList should remove the added item from state', () => {
       const action = ReadingListActions.failedAddToReadingList({
-        book: createBook('B')
+        book: createBook('B'),
       });
 
       const result: State = reducer(state, action);
@@ -44,7 +44,7 @@ describe('Books Reducer', () => {
 
     it('failedRemoveFromReadingList should add the removed item to the state', () => {
       const action = ReadingListActions.failedRemoveFromReadingList({
-        item: createReadingListItem('C')
+        item: createReadingListItem('C'),
       });
 
       const result: State = reducer(state, action);
@@ -54,7 +54,8 @@ describe('Books Reducer', () => {
 
     it('addToReadingList should add book to the state', () => {
       const action = ReadingListActions.addToReadingList({
-        book: createBook('C')
+        book: createBook('C'),
+        undoAction: false,
       });
 
       const result: State = reducer(state, action);
@@ -63,7 +64,8 @@ describe('Books Reducer', () => {
     });
     it('removeFromReadingList should remove book from the state', () => {
       const action = ReadingListActions.removeFromReadingList({
-        item: createReadingListItem('C')
+        item: createReadingListItem('C'),
+        undoAction: false,
       });
 
       const result: State = reducer(state, action);
