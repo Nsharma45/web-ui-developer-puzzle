@@ -2,12 +2,12 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Actions, createEffect, ofType, OnInitEffects } from '@ngrx/effects';
 import { of } from 'rxjs';
-import { catchError, concatMap, exhaustMap, map } from 'rxjs/operators';
+import { catchError, concatMap, exhaustMap, map, take } from 'rxjs/operators';
 import { ReadingListItem } from '@tmo/shared/models';
 import * as ReadingListActions from './reading-list.actions';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { BookConstant } from '../book.constant';
-import { take } from 'rxjs/operators';
+import { BookConstant } from './book.constant';
+import { Store } from '@ngrx/store';
 
 @Injectable()
 export class ReadingListEffects implements OnInitEffects {
@@ -32,27 +32,17 @@ export class ReadingListEffects implements OnInitEffects {
   addBook$ = createEffect(() =>
     this.actions$.pipe(
       ofType(ReadingListActions.addToReadingList),
-      concatMap(({ book }) =>
+      concatMap(({ book, undoAction }) =>
         this.http.post('/api/reading-list', book).pipe(
-          map(() =>
-            ReadingListActions.confirmedAddToReadingList()
-              .pipe(take(1))
-              .subscribe(() => {
-                const snackBarRef = this.snackbar.open(
-                  book.title + BookConstant.ADDED_MSG,
-                  BookConstant.UNDO,
-                  {
-                    duration: BookConstant.SNACKBAR_DURATION,
-                  }
-                );
-
-                snackBarRef.onAction().subscribe(() => {
-                  ReadingListActions.removeFromReadingList({
-                    item: { ...book, bookId: book.id },
-                  });
-                });
-              })
-          ),
+          map(() => {
+            this.openSnackBar(
+              BookConstant.ADD_ACTION,
+              book,
+              book.title + ' ' + BookConstant.ADDED_MSG,
+              undoAction
+            );
+            return ReadingListActions.confirmedAddToReadingList();
+          }),
           catchError(() =>
             of(ReadingListActions.failedAddToReadingList({ book }))
           )
@@ -64,26 +54,17 @@ export class ReadingListEffects implements OnInitEffects {
   removeBook$ = createEffect(() =>
     this.actions$.pipe(
       ofType(ReadingListActions.removeFromReadingList),
-      concatMap(({ item }) =>
+      concatMap(({ item, undoAction }) =>
         this.http.delete(`/api/reading-list/${item.bookId}`).pipe(
-          map(() =>
-            ReadingListActions.confirmedRemoveFromReadingList()
-              .pipe(take(1))
-              .subscribe(() => {
-                const snackbarRef = this.snackbar.open(
-                  item.title + BookConstant.REMOVED_MSG,
-                  BookConstant.UNDO,
-                  {
-                    duration: BookConstant.SNACKBAR_DURATION,
-                  }
-                );
-                snackbarRef.onAction().subscribe(() => {
-                  ReadingListActions.addToReadingList({
-                    book: { ...item, id: item.bookId },
-                  });
-                });
-              })
-          ),
+          map(() => {
+            this.openSnackBar(
+              BookConstant.REMOVE_ACTION,
+              item,
+              item.title + ' ' + BookConstant.REMOVED_MSG,
+              undoAction
+            );
+            return ReadingListActions.confirmedRemoveFromReadingList();
+          }),
           catchError(() =>
             of(ReadingListActions.failedRemoveFromReadingList({ item }))
           )
@@ -96,9 +77,34 @@ export class ReadingListEffects implements OnInitEffects {
     return ReadingListActions.init();
   }
 
+  openSnackBar(actionType, element, message, undoAction) {
+    if (!undoAction)
+      this.snackbar
+        .open(message, 'undo', { duration: BookConstant.SNACKBAR_DURATION })
+        .onAction()
+        .subscribe(() => {
+          if (actionType === BookConstant.ADD_ACTION) {
+            this.store.dispatch(
+              ReadingListActions.removeFromReadingList({
+                item: { ...element, bookId: element.id },
+                undoAction: true,
+              })
+            );
+          } else {
+            this.store.dispatch(
+              ReadingListActions.addToReadingList({
+                book: { ...element, id: element.bookId },
+                undoAction: true,
+              })
+            );
+          }
+        });
+  }
+
   constructor(
     private actions$: Actions,
     private http: HttpClient,
-    private snackbar: MatSnackBar
+    private snackbar: MatSnackBar,
+    private store: Store
   ) {}
 }

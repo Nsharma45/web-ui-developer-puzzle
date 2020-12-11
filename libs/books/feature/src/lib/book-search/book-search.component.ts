@@ -31,7 +31,7 @@ export class BookSearchComponent {
   }
 
   addBookToReadingList(book: Book) {
-    this.store.dispatch(addToReadingList({ book }));
+    this.store.dispatch(addToReadingList({ book, undoAction: false }));
   }
   searchExample() {
     this.searchForm.controls.term.setValue('javascript');

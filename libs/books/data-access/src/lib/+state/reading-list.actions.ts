@@ -14,7 +14,7 @@ export const loadReadingListError = createAction(
 
 export const addToReadingList = createAction(
   '[Books Search Results] Add to list',
-  props<{ book: Book }>()
+  props<{ book: Book; undoAction: boolean }>()
 );
 
 export const failedAddToReadingList = createAction(
@@ -28,7 +28,7 @@ export const confirmedAddToReadingList = createAction(
 
 export const removeFromReadingList = createAction(
   '[Books Search Results] Remove from list',
-  props<{ item: ReadingListItem }>()
+  props<{ item: ReadingListItem; undoAction: boolean }>()
 );
 
 export const failedRemoveFromReadingList = createAction(

@@ -12,6 +12,6 @@ export class ReadingListComponent {
   constructor(private readonly store: Store) {}
 
   removeFromReadingList(item) {
-    this.store.dispatch(removeFromReadingList({ item }));
+    this.store.dispatch(removeFromReadingList({ item, undoAction: false }));
   }
 }
