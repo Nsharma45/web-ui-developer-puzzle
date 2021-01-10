@@ -4,8 +4,7 @@ import {
   addToReadingList,
   clearSearch,
   getAllBooks,
-  ReadingListBook,
-  searchBooks
+  searchBooks,
 } from '@tmo/books/data-access';
 import { FormBuilder } from '@angular/forms';
 import { Book } from '@tmo/shared/models';
@@ -13,13 +12,13 @@ import { Book } from '@tmo/shared/models';
 @Component({
   selector: 'tmo-book-search',
   templateUrl: './book-search.component.html',
-  styleUrls: ['./book-search.component.scss']
+  styleUrls: ['./book-search.component.scss'],
 })
 export class BookSearchComponent {
   books$ = this.store.select(getAllBooks);
 
   searchForm = this.fb.group({
-    term: ''
+    term: '',
   });
 
   constructor(
@@ -32,9 +31,8 @@ export class BookSearchComponent {
   }
 
   addBookToReadingList(book: Book) {
-    this.store.dispatch(addToReadingList({ book }));
+    this.store.dispatch(addToReadingList({ book, undoAction: false }));
   }
-
   searchExample() {
     this.searchForm.controls.term.setValue('javascript');
     this.searchBooks();

@@ -14,7 +14,7 @@
 </form>
 
 <ng-container *ngIf="searchTerm; else empty" class="row">
-  <div class="book-grid  col-xs-12">
+  <div class="book-grid col-xs-12">
     <div class="book" data-testing="book-item" *ngFor="let b of books$ | async">
       <div class="book--title">
         {{ b.title }}
@@ -38,6 +38,7 @@
               (click)="addBookToReadingList(b)"
               [disabled]="b.isAdded"
               aria-label="Want to Read"
+              data-testing="add-book-to-read"
             >
               Want to Read
             </button>
